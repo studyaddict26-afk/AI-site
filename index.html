@@ -6,6 +6,7 @@
 <title>홀로 | ROADMAP × STUDY ADDICT</title>
 <script>
   if (location.hash === "#admin") document.documentElement.setAttribute("data-boot", "admin");
+  if (location.hash === "#form") document.documentElement.setAttribute("data-boot", "form");
 </script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
@@ -182,9 +183,14 @@
   .view.on { display: flex; }
   html[data-boot="admin"] .view.on { display: none; }
   html[data-boot="admin"] #view-admin { display: flex; }
+  html[data-boot="form"] .view.on { display: none; }
+  html[data-boot="form"] #view-form { display: flex; }
   html[data-boot="admin"] .sidebar,
   html[data-boot="admin"] .overlay,
-  html[data-boot="admin"] .topbar { display: none; }
+  html[data-boot="admin"] .topbar,
+  html[data-boot="form"] .sidebar,
+  html[data-boot="form"] .overlay,
+  html[data-boot="form"] .topbar { display: none; }
 
   /* ═══════════ 홈 화면 ═══════════ */
   #view-home { overflow-y: auto; scrollbar-gutter: stable; }
@@ -1367,6 +1373,30 @@
   .admin-status-btn { border: none; background: none; color: var(--green); font-weight: 700; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
   .admin-delete-btn { border: none; background: none; color: #B3261E; font-weight: 700; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
   .admin-empty { padding: 40px 20px; text-align: center; color: var(--ink-soft); font-size: 0.88rem; }
+  .admin-forms-list { display: flex; flex-direction: column; gap: 10px; }
+  .admin-form-card {
+    background: var(--paper); border: 1px solid var(--line); border-radius: 10px;
+    padding: 16px 18px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  }
+  .admin-form-card-main { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .admin-form-card-name { font-weight: 800; font-size: 0.95rem; color: var(--ink); }
+  .admin-form-card-meta { font-size: 0.78rem; color: var(--ink-soft); word-break: keep-all; }
+  .admin-form-card-actions { display: flex; gap: 14px; flex: none; }
+  .form-detail-body { max-height: 60vh; overflow-y: auto; }
+  .fd-row { margin-bottom: 14px; }
+  .fd-row:last-child { margin-bottom: 0; }
+  .fd-label { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.04em; color: var(--green); margin-bottom: 4px; }
+  .fd-value { font-size: 0.88rem; color: var(--ink); line-height: 1.6; white-space: pre-wrap; word-break: keep-all; }
+
+  /* ── 학습 상담 신청서 (학생용 공개 페이지) ── */
+  .public-form-wrap { max-width: 720px; width: 100%; margin: 0 auto; padding: 44px 24px 70px 24px; overflow-y: auto; }
+  .public-form-wrap h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.01em; }
+  .public-form-wrap .admin-page-sub { margin: 6px 0 28px 0; }
+  .cf-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 640px) { .cf-row { grid-template-columns: 1fr; } }
+  .apply-field textarea.cf-textarea { min-height: 90px; }
+  .apply-field textarea.cf-questions { min-height: 180px; }
   @media (max-width: 760px) {
     .admin-shell { flex-direction: column; }
     .admin-sidebar { width: 100%; flex-direction: row; align-items: center; padding: 14px 16px; }
@@ -2621,6 +2651,95 @@
     </div>
   </section>
 
+  <!-- ─── 학습 상담 신청서 (학생 공개용, index.html#form 으로 접근, 사이드바 비노출) ─── -->
+  <section class="view" id="view-form">
+    <div class="public-form-wrap">
+      <h2>학습 상담 신청서</h2>
+      <p class="admin-page-sub">아래 내용을 최대한 구체적으로 작성해주세요.</p>
+
+      <form id="counselingForm" onsubmit="submitCounselingForm(event)">
+        <div class="cf-row">
+          <div class="apply-field">
+            <label for="cf-name">이름</label>
+            <input type="text" id="cf-name" required>
+          </div>
+          <div class="apply-field">
+            <label for="cf-school">학교</label>
+            <input type="text" id="cf-school" required>
+          </div>
+          <div class="apply-field">
+            <label for="cf-grade">학년</label>
+            <input type="text" id="cf-grade" required>
+          </div>
+        </div>
+
+        <div class="apply-field">
+          <label for="cf-schedule">상담 일정</label>
+          <input type="text" id="cf-schedule" placeholder="예: 8/25(화) 저녁 7시 이후 가능">
+        </div>
+
+        <div class="cf-row" style="grid-template-columns:1fr 1fr;">
+          <div class="apply-field">
+            <label for="cf-naesin-subj">내신 선택 과목</label>
+            <input type="text" id="cf-naesin-subj">
+          </div>
+          <div class="apply-field">
+            <label for="cf-jeongsi-subj">정시 선택 과목</label>
+            <input type="text" id="cf-jeongsi-subj">
+          </div>
+        </div>
+
+        <div class="apply-field">
+          <label>성적 — 과목 별로 작성해주세요!</label>
+        </div>
+        <div class="cf-row" style="grid-template-columns:1fr 1fr; margin-top:-8px;">
+          <div class="apply-field">
+            <label for="cf-grade-naesin">[내신]</label>
+            <textarea id="cf-grade-naesin" class="cf-textarea" placeholder="예: 국어 2등급, 수학 3등급..."></textarea>
+          </div>
+          <div class="apply-field">
+            <label for="cf-grade-mock">[모의고사]</label>
+            <textarea id="cf-grade-mock" class="cf-textarea" placeholder="예: 국어 1등급, 수학 2등급..."></textarea>
+          </div>
+        </div>
+
+        <div class="cf-row" style="grid-template-columns:1fr 1fr;">
+          <div class="apply-field">
+            <label for="cf-target-univ">목표 대학 및 학과</label>
+            <input type="text" id="cf-target-univ">
+          </div>
+          <div class="apply-field">
+            <label for="cf-min-univ">하한선 대학</label>
+            <input type="text" id="cf-min-univ">
+          </div>
+        </div>
+
+        <div class="apply-field">
+          <label for="cf-academy">다니는 학원 및 과외</label>
+          <input type="text" id="cf-academy">
+        </div>
+
+        <div class="apply-field">
+          <label>입시 방향성</label>
+          <div class="apply-checks" style="grid-template-columns:1fr 1fr;">
+            <label class="apply-check"><input type="checkbox" name="cf-direction" value="학종"><span class="apply-check-box"></span>학종</label>
+            <label class="apply-check"><input type="checkbox" name="cf-direction" value="교과"><span class="apply-check-box"></span>교과</label>
+            <label class="apply-check"><input type="checkbox" name="cf-direction" value="논술"><span class="apply-check-box"></span>논술</label>
+            <label class="apply-check"><input type="checkbox" name="cf-direction" value="정시"><span class="apply-check-box"></span>정시</label>
+          </div>
+        </div>
+
+        <div class="apply-field">
+          <label for="cf-questions">질문 사항 — 최대한 구체적으로 작성해주세요!</label>
+          <textarea id="cf-questions" class="cf-questions" placeholder="궁금한 점, 고민되는 부분을 자유롭게 적어주세요"></textarea>
+        </div>
+
+        <button type="submit" class="apply-submit-btn" id="cfSubmitBtn" style="width:100%;">제출하기</button>
+        <div class="apply-status-msg" id="cfMsg"></div>
+      </form>
+    </div>
+  </section>
+
   <!-- ─── 관리자 (사이드바에 노출되지 않음, index.html#admin 으로 접근) ─── -->
   <section class="view" id="view-admin">
     <div class="admin-login-box" id="adminLoginBox">
@@ -2651,6 +2770,9 @@
           </button>
           <button class="admin-nav-item" type="button" onclick="showAdminPanel('schedule', this)">
             <span class="admin-nav-ico">🗓️</span> 학습 상담 일정 현황
+          </button>
+          <button class="admin-nav-item" type="button" onclick="showAdminPanel('forms', this)">
+            <span class="admin-nav-ico">📝</span> 상담 신청서 관리
           </button>
         </nav>
         <div class="admin-sidebar-bottom">
@@ -2758,6 +2880,18 @@
             <div class="admin-empty" id="adminScheduleEmptyMsg" style="display:none;">확정된 상담 일정이 아직 없습니다.</div>
           </div>
         </div>
+
+        <div class="admin-panel" id="adminPanelForms" style="display:none;">
+          <div class="admin-page-head">
+            <span class="admin-page-ico">📝</span>
+            <div>
+              <h2>상담 신청서 관리</h2>
+              <p class="admin-page-sub">학생들이 제출한 학습 상담 신청서를 확인합니다.</p>
+            </div>
+          </div>
+          <div id="adminFormsList" class="admin-forms-list"></div>
+          <div class="admin-empty" id="adminFormsEmptyMsg" style="display:none;">아직 제출된 신청서가 없습니다.</div>
+        </div>
       </main>
     </div>
   </section>
@@ -2852,6 +2986,17 @@
     </div>
   </div>
 
+  <!-- ─── 상담 신청서 상세 보기 모달 ─── -->
+  <div class="apply-modal-overlay" id="formDetailModalOverlay" onclick="if(event.target===this) closeFormDetail()">
+    <div class="apply-modal" style="max-width:560px;">
+      <h3>상담 신청서 상세</h3>
+      <div id="formDetailBody" class="form-detail-body"></div>
+      <div class="apply-actions" style="margin-top:18px;">
+        <button type="button" class="apply-cancel-btn" onclick="closeFormDetail()">닫기</button>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Firebase (신청 폼 저장 + 관리자 페이지용) -->
@@ -2874,14 +3019,14 @@
 
 <script>
   // ── 뷰 전환 ──
-  const titles = { home: "홀로", consult: "학습 상담 안내", "consult-1": "전반적인 학습 컨설팅", "consult-2": "수학 과외", "consult-3": "국어 과외", math: "수학 질문하기", kor: "국어 질문하기", rm1: "나는 로드맵에서 이렇게 공부했어", rm2: "현강, 인강 강사 추천해줄게", rm3: "대학 입시 제도 알고 있어?", rm4: "나만의 내신, 수능 꿀팁 알려줄게", rm5: "공부가 안 될 땐 이렇게 해봐", admin: "관리자" };
+  const titles = { home: "홀로", consult: "학습 상담 안내", "consult-1": "전반적인 학습 컨설팅", "consult-2": "수학 과외", "consult-3": "국어 과외", math: "수학 질문하기", kor: "국어 질문하기", rm1: "나는 로드맵에서 이렇게 공부했어", rm2: "현강, 인강 강사 추천해줄게", rm3: "대학 입시 제도 알고 있어?", rm4: "나만의 내신, 수능 꿀팁 알려줄게", rm5: "공부가 안 될 땐 이렇게 해봐", admin: "관리자", form: "학습 상담 신청서" };
   function go(view) {
     document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
     document.getElementById("view-" + view).classList.add("on");
     document.querySelectorAll(".sb-item").forEach(b =>
       b.classList.toggle("active", b.dataset.view === view));
     document.getElementById("viewTitle").textContent = titles[view];
-    document.body.classList.toggle("is-admin", view === "admin");
+    document.body.classList.toggle("is-admin", view === "admin" || view === "form");
     if (window.innerWidth <= 760) closeSidebar();
   }
 
@@ -3141,6 +3286,46 @@
     });
   }
 
+  // ── 학습 상담 신청서 (학생용) ──
+  function submitCounselingForm(e) {
+    e.preventDefault();
+    const btn = document.getElementById("cfSubmitBtn");
+    const msg = document.getElementById("cfMsg");
+    const directions = Array.from(document.querySelectorAll('input[name="cf-direction"]:checked')).map(c => c.value);
+    const data = {
+      name: document.getElementById("cf-name").value.trim(),
+      school: document.getElementById("cf-school").value.trim(),
+      grade: document.getElementById("cf-grade").value.trim(),
+      schedule: document.getElementById("cf-schedule").value.trim(),
+      naesinSubjects: document.getElementById("cf-naesin-subj").value.trim(),
+      jeongsiSubjects: document.getElementById("cf-jeongsi-subj").value.trim(),
+      gradeNaesin: document.getElementById("cf-grade-naesin").value.trim(),
+      gradeMock: document.getElementById("cf-grade-mock").value.trim(),
+      targetUniv: document.getElementById("cf-target-univ").value.trim(),
+      minUniv: document.getElementById("cf-min-univ").value.trim(),
+      academy: document.getElementById("cf-academy").value.trim(),
+      directions: directions,
+      questions: document.getElementById("cf-questions").value.trim(),
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    btn.disabled = true;
+    btn.textContent = "제출 중...";
+    msg.textContent = "";
+    msg.className = "apply-status-msg";
+    db.collection("counselingForms").add(data).then(() => {
+      msg.textContent = "제출이 완료됐습니다. 감사합니다!";
+      msg.className = "apply-status-msg success";
+      btn.textContent = "제출 완료";
+      document.getElementById("counselingForm").reset();
+    }).catch(err => {
+      console.error(err);
+      msg.textContent = "제출 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.";
+      msg.className = "apply-status-msg error";
+      btn.disabled = false;
+      btn.textContent = "제출하기";
+    });
+  }
+
   // ── 관리자 페이지 ──
   function adminLogin() {
     const email = document.getElementById("admin-email").value.trim();
@@ -3303,6 +3488,68 @@
   function deleteAvailability(id) {
     db.collection("availability").doc(id).delete().catch(err => console.error(err));
   }
+
+  // ── 상담 신청서 관리 ──
+  let unsubscribeForms = null;
+  let adminAllForms = [];
+  function loadForms() {
+    if (unsubscribeForms) return;
+    unsubscribeForms = db.collection("counselingForms").orderBy("createdAt", "desc")
+      .onSnapshot(snap => {
+        adminAllForms = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderForms();
+      }, err => console.error(err));
+  }
+  function renderForms() {
+    const list = document.getElementById("adminFormsList");
+    const empty = document.getElementById("adminFormsEmptyMsg");
+    if (!list) return;
+    if (!adminAllForms.length) {
+      list.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+    list.innerHTML = adminAllForms.map(f => {
+      const meta = [f.school, f.grade].filter(Boolean).join(" ") + (f.schedule ? " · " + f.schedule : "");
+      return "<div class=\"admin-form-card\">"
+        + "<div class=\"admin-form-card-main\">"
+        + "<span class=\"admin-form-card-name\">" + escapeHtml(f.name || "-") + "</span>"
+        + "<span class=\"admin-form-card-meta\">" + escapeHtml(meta) + "</span>"
+        + "</div>"
+        + "<div class=\"admin-form-card-actions\">"
+        + "<button type=\"button\" class=\"admin-status-btn\" onclick=\"openFormDetail('" + f.id + "')\">자세히 보기</button>"
+        + "<button type=\"button\" class=\"admin-delete-btn\" onclick=\"deleteForm('" + f.id + "')\">삭제</button>"
+        + "</div>"
+        + "</div>";
+    }).join("");
+  }
+  function deleteForm(id) {
+    if (!confirm("이 신청서를 삭제할까요? 삭제하면 되돌릴 수 없습니다.")) return;
+    db.collection("counselingForms").doc(id).delete().catch(err => console.error(err));
+  }
+  function openFormDetail(id) {
+    const f = adminAllForms.find(x => x.id === id);
+    if (!f) return;
+    const rows = [
+      ["이름", f.name], ["학교", f.school], ["학년", f.grade],
+      ["상담 일정", f.schedule],
+      ["내신 선택 과목", f.naesinSubjects], ["정시 선택 과목", f.jeongsiSubjects],
+      ["성적 (내신)", f.gradeNaesin], ["성적 (모의고사)", f.gradeMock],
+      ["목표 대학 및 학과", f.targetUniv], ["하한선 대학", f.minUniv],
+      ["다니는 학원 및 과외", f.academy],
+      ["입시 방향성", (f.directions || []).join(", ")],
+      ["질문 사항", f.questions]
+    ];
+    document.getElementById("formDetailBody").innerHTML = rows.map(function (pair) {
+      return "<div class=\"fd-row\"><div class=\"fd-label\">" + escapeHtml(pair[0]) + "</div><div class=\"fd-value\">" + escapeHtml(pair[1] || "-") + "</div></div>";
+    }).join("");
+    document.getElementById("formDetailModalOverlay").classList.add("on");
+  }
+  function closeFormDetail() {
+    document.getElementById("formDetailModalOverlay").classList.remove("on");
+  }
+
   let unsubscribeAvailability = null;
   let adminAllAvailability = [];
   function loadAvailability() {
@@ -3413,8 +3660,10 @@
     document.getElementById("adminPanelAvailability").style.display = name === "availability" ? "block" : "none";
     document.getElementById("adminPanelReservations").style.display = name === "reservations" ? "block" : "none";
     document.getElementById("adminPanelSchedule").style.display = name === "schedule" ? "block" : "none";
+    document.getElementById("adminPanelForms").style.display = name === "forms" ? "block" : "none";
     if (name === "schedule") renderAdminSchedule();
     if (name === "availability") renderAvailability();
+    if (name === "forms") renderForms();
   }
   function renderAdminTable() {
     const body = document.getElementById("adminTableBody");
@@ -3494,6 +3743,7 @@
       dash.style.display = "flex";
       loadReservations();
       loadAvailability();
+      loadForms();
     } else {
       loginBox.style.display = "block";
       dash.style.display = "none";
@@ -3501,6 +3751,7 @@
   });
 
   if (location.hash === "#admin") go("admin");
+  if (location.hash === "#form") go("form");
   document.documentElement.removeAttribute("data-boot");
 </script>
 </body>
