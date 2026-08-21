@@ -1390,17 +1390,21 @@
   .fd-value { font-size: 0.88rem; color: var(--ink); line-height: 1.6; white-space: pre-wrap; word-break: keep-all; }
 
   /* ── 학습 상담 신청서 (학생용 공개 페이지) ── */
-  .public-form-wrap { max-width: 1000px; width: 100%; margin: 0 auto; padding: 44px 24px 70px 24px; overflow-y: auto; }
-  .public-form-wrap h2 { font-size: 1.4rem; font-weight: 800; letter-spacing: -0.01em; }
-  .public-form-wrap .admin-page-sub { margin: 6px 0 0 0; }
-  .cf-title-row { display: flex; align-items: center; gap: 16px; margin-bottom: 30px; }
+  .public-form-wrap { max-width: 1000px; width: 100%; margin: 0 auto; padding: 20px 24px 20px 24px; overflow-y: auto; box-sizing: border-box; }
+  .public-form-wrap h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }
+  .public-form-wrap .admin-page-sub { margin: 4px 0 0 0; font-size: 0.8rem; }
+  .cf-title-row { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
   .cf-photo {
-    flex: none; height: 60px; width: 60px; border-radius: 50%;
-    object-fit: cover; border: 3px solid var(--paper);
-    box-shadow: 0 0 0 1.5px var(--line), 0 8px 20px rgba(23,24,26,0.12);
+    flex: none; height: 46px; width: 46px; border-radius: 50%;
+    object-fit: cover; border: 2px solid var(--paper);
+    box-shadow: 0 0 0 1.5px var(--line), 0 6px 16px rgba(23,24,26,0.12);
   }
-  .cf-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: stretch; }
+  .cf-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: stretch; }
   .cf-col { display: flex; flex-direction: column; min-width: 0; }
+  .public-form-wrap .apply-field { margin-bottom: 9px; }
+  .public-form-wrap .apply-field label { margin-bottom: 4px; }
+  .public-form-wrap .apply-field input,
+  .public-form-wrap .apply-field textarea { padding: 7px 10px; font-size: 0.84rem; }
   .cf-questions-field { flex: 1; display: flex; flex-direction: column; }
   .cf-questions-field textarea { flex: 1; }
   @media (max-width: 860px) {
@@ -1408,8 +1412,8 @@
   }
   .cf-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   @media (max-width: 640px) { .cf-row { grid-template-columns: 1fr; } }
-  .apply-field textarea.cf-textarea { min-height: 90px; }
-  .apply-field textarea.cf-questions { min-height: 180px; }
+  .apply-field textarea.cf-textarea { min-height: 56px; }
+  .apply-field textarea.cf-questions { min-height: 100px; }
   @media (max-width: 760px) {
     .admin-shell { flex-direction: column; }
     .admin-sidebar { width: 100%; flex-direction: row; align-items: center; padding: 14px 16px; }
@@ -2694,8 +2698,8 @@
             </div>
 
             <div class="apply-field">
-              <label for="cf-schedule">상담 일정</label>
-              <input type="text" id="cf-schedule" placeholder="예: 8/25(화) 저녁 7시 이후 가능">
+              <label for="cf-schedule">확정된 상담 일정</label>
+              <input type="text" id="cf-schedule">
             </div>
 
             <div class="cf-row" style="grid-template-columns:1fr 1fr;">
@@ -2741,11 +2745,11 @@
 
             <div class="apply-field">
               <label>입시 방향성</label>
-              <div class="apply-checks" style="grid-template-columns:1fr 1fr;">
-                <label class="apply-check"><input type="checkbox" name="cf-direction" value="학종"><span class="apply-check-box"></span>학종</label>
-                <label class="apply-check"><input type="checkbox" name="cf-direction" value="교과"><span class="apply-check-box"></span>교과</label>
-                <label class="apply-check"><input type="checkbox" name="cf-direction" value="논술"><span class="apply-check-box"></span>논술</label>
-                <label class="apply-check"><input type="checkbox" name="cf-direction" value="정시"><span class="apply-check-box"></span>정시</label>
+              <div class="apply-checks" style="grid-template-columns:repeat(4,1fr); gap:6px;">
+                <label class="apply-check" style="padding:9px 8px;"><input type="checkbox" name="cf-direction" value="학종"><span class="apply-check-box"></span>학종</label>
+                <label class="apply-check" style="padding:9px 8px;"><input type="checkbox" name="cf-direction" value="교과"><span class="apply-check-box"></span>교과</label>
+                <label class="apply-check" style="padding:9px 8px;"><input type="checkbox" name="cf-direction" value="논술"><span class="apply-check-box"></span>논술</label>
+                <label class="apply-check" style="padding:9px 8px;"><input type="checkbox" name="cf-direction" value="정시"><span class="apply-check-box"></span>정시</label>
               </div>
             </div>
           </div>
@@ -2756,7 +2760,7 @@
               <textarea id="cf-questions" class="cf-questions" placeholder="궁금한 점, 고민되는 부분을 자유롭게 적어주세요"></textarea>
             </div>
 
-            <button type="submit" class="apply-submit-btn" id="cfSubmitBtn" style="width:100%;">제출하기</button>
+            <button type="submit" class="apply-submit-btn" id="cfSubmitBtn" style="flex:none; width:100%; margin-top:10px;">제출하기</button>
             <div class="apply-status-msg" id="cfMsg"></div>
           </div>
         </div>
