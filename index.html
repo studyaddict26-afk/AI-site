@@ -3083,6 +3083,24 @@
       return;
     }
     if (!scheduleTargetId) return;
+    const toMinutes = t => {
+      const m = t.match(/^(\d{1,2})시 (\d{1,2})분$/);
+      return m ? (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) : null;
+    };
+    const newStart = toMinutes(start), newEnd = toMinutes(end);
+    const overlap = adminAllReservations.some(r => {
+      if (r.id === scheduleTargetId) return false;
+      if (statusLabel(r.status) !== "확정") return false;
+      if (r.scheduleDate !== date) return false;
+      const exStart = toMinutes(r.scheduleStart), exEnd = toMinutes(r.scheduleEnd);
+      if (exStart == null || exEnd == null) return false;
+      return newStart < exEnd && newEnd > exStart;
+    });
+    if (overlap) {
+      msg.textContent = "이미 확정된 상담이 있습니다.";
+      msg.className = "apply-status-msg error";
+      return;
+    }
     db.collection("reservations").doc(scheduleTargetId).update({
       status: "확정", scheduleDate: date, scheduleStart: start, scheduleEnd: end
     }).then(() => {
