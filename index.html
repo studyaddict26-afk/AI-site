@@ -1280,9 +1280,12 @@
   .apply-status-msg.success { color: var(--green-deep); font-weight: 700; }
 
   /* ── 관리자 페이지 ── */
+  #view-admin { position: relative; }
   .admin-login-box {
-    max-width: 360px; margin: 60px auto; background: var(--paper); border: 1px solid var(--line);
-    border-radius: 12px; padding: 32px 28px;
+    max-width: 480px; width: calc(100% - 40px);
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 12px; padding: 40px 40px;
   }
   .admin-login-box h2 { font-size: 1.2rem; font-weight: 800; margin-bottom: 18px; }
 
@@ -1349,6 +1352,7 @@
   .admin-status-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
   .admin-status-pill.status-대기 { background: #FDECEA; color: #B3261E; }
   .admin-status-pill.status-확정 { background: var(--green-soft); color: var(--green-deep); }
+  .admin-status-pill.status-완료 { background: var(--green-soft); color: var(--green-deep); }
   .admin-status-btn { border: none; background: none; color: var(--green); font-weight: 700; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
   .admin-empty { padding: 40px 20px; text-align: center; color: var(--ink-soft); font-size: 0.88rem; }
   @media (max-width: 760px) {
@@ -2610,7 +2614,6 @@
         </nav>
         <div class="admin-sidebar-bottom">
           <button type="button" class="admin-side-logout" onclick="adminLogout()">로그아웃</button>
-          <a class="admin-home-link" href="./">← 메인 사이트로 이동</a>
         </div>
       </aside>
 
@@ -2673,9 +2676,11 @@
                 <tr>
                   <th>상담 날짜</th>
                   <th>상담 시간</th>
-                  <th>이름</th>
+                  <th>학생 이름</th>
                   <th>상담 종류</th>
                   <th>학생 전화번호</th>
+                  <th>상담비 납부 현황</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody id="adminScheduleBody"></tbody>
@@ -2695,21 +2700,40 @@
       <form id="scheduleForm" onsubmit="submitSchedule(event)">
         <div class="apply-field">
           <label for="sch-date">상담 날짜</label>
-          <input type="text" id="sch-date" placeholder="2026-09-03" required>
+          <input type="text" id="sch-date" placeholder="예: 2026-09-03" required>
         </div>
         <div class="apply-field">
           <label for="sch-start">시작 시간</label>
-          <input type="text" id="sch-start" placeholder="21시 20분" required>
+          <input type="text" id="sch-start" placeholder="예: 21시 20분" required>
         </div>
         <div class="apply-field">
           <label for="sch-end">끝나는 시간</label>
-          <input type="text" id="sch-end" placeholder="22시 20분" required>
+          <input type="text" id="sch-end" placeholder="예: 22시 20분" required>
         </div>
         <div class="apply-actions">
           <button type="button" class="apply-cancel-btn" onclick="closeScheduleModal()">취소</button>
           <button type="submit" class="apply-submit-btn">확정하기</button>
         </div>
         <div class="apply-status-msg" id="scheduleMsg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── 상담비 입금 날짜 입력 모달 ─── -->
+  <div class="apply-modal-overlay" id="paymentModalOverlay" onclick="if(event.target===this) closePaymentModal()">
+    <div class="apply-modal" style="max-width:360px;">
+      <h3>상담비 입금 날짜 입력</h3>
+      <div class="apply-sub">입금 날짜를 입력해야 납부 완료 처리됩니다.</div>
+      <form id="paymentForm" onsubmit="submitPayment(event)">
+        <div class="apply-field">
+          <label for="pay-date">입금된 날짜</label>
+          <input type="text" id="pay-date" placeholder="예: 2026-09-03" required>
+        </div>
+        <div class="apply-actions">
+          <button type="button" class="apply-cancel-btn" onclick="closePaymentModal()">취소</button>
+          <button type="submit" class="apply-submit-btn">완료로 처리</button>
+        </div>
+        <div class="apply-status-msg" id="paymentMsg"></div>
       </form>
     </div>
   </div>
@@ -3068,6 +3092,46 @@
       msg.className = "apply-status-msg error";
     });
   }
+  function paymentStatusLabel(s) { return s === "완료" ? "완료" : "대기"; }
+  let paymentTargetId = null;
+  function togglePaymentStatus(id, current) {
+    if (current === "완료") {
+      db.collection("reservations").doc(id).update({ paymentStatus: "대기" });
+      return;
+    }
+    paymentTargetId = id;
+    const r = adminAllReservations.find(x => x.id === id);
+    document.getElementById("paymentForm").reset();
+    document.getElementById("paymentMsg").textContent = "";
+    document.getElementById("paymentMsg").className = "apply-status-msg";
+    if (r && r.paymentDate) document.getElementById("pay-date").value = r.paymentDate;
+    document.getElementById("paymentModalOverlay").classList.add("on");
+  }
+  function closePaymentModal() {
+    document.getElementById("paymentModalOverlay").classList.remove("on");
+    paymentTargetId = null;
+  }
+  function submitPayment(e) {
+    e.preventDefault();
+    const msg = document.getElementById("paymentMsg");
+    const date = document.getElementById("pay-date").value.trim();
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+    if (!datePattern.test(date)) {
+      msg.textContent = "입금 날짜는 2026-09-03 형식으로 입력해주세요.";
+      msg.className = "apply-status-msg error";
+      return;
+    }
+    if (!paymentTargetId) return;
+    db.collection("reservations").doc(paymentTargetId).update({
+      paymentStatus: "완료", paymentDate: date
+    }).then(() => {
+      closePaymentModal();
+    }).catch(err => {
+      console.error(err);
+      msg.textContent = "저장 중 오류가 발생했어요.";
+      msg.className = "apply-status-msg error";
+    });
+  }
   function fmtDate(ts) {
     if (!ts || !ts.toDate) return "-";
     const d = ts.toDate();
@@ -3075,6 +3139,9 @@
   }
   function escapeHtml(s) {
     return (s || "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+  function formatTypes(types) {
+    return types.map(t => escapeHtml(t)).join("<br>");
   }
   let unsubscribeReservations = null;
   let adminAllReservations = [];
@@ -3125,7 +3192,7 @@
         + "<td>" + fmtDate(r.createdAt) + "</td>"
         + "<td>" + escapeHtml(r.name) + "</td>"
         + "<td>" + escapeHtml(r.school || "-") + "</td>"
-        + "<td style=\"white-space:normal; max-width:200px;\">" + escapeHtml(types.join(", ")) + "</td>"
+        + "<td style=\"white-space:normal; max-width:200px;\">" + formatTypes(types) + "</td>"
         + "<td>" + escapeHtml(r.studentPhone || r.phone || "-") + "</td>"
         + "<td>" + escapeHtml(r.parentPhone || "-") + "</td>"
         + "<td><span class=\"admin-status-pill status-" + st + "\">" + st + "</span></td>"
@@ -3158,8 +3225,11 @@
         + "<td>" + escapeHtml(r.scheduleDate) + "</td>"
         + "<td>" + escapeHtml(r.scheduleStart) + " ~ " + escapeHtml(r.scheduleEnd) + "</td>"
         + "<td>" + escapeHtml(r.name) + "</td>"
-        + "<td style=\"white-space:normal; max-width:200px;\">" + escapeHtml(types.join(", ")) + "</td>"
+        + "<td style=\"white-space:normal; max-width:200px;\">" + formatTypes(types) + "</td>"
         + "<td>" + escapeHtml(r.studentPhone || r.phone || "-") + "</td>"
+        + "<td><span class=\"admin-status-pill status-" + paymentStatusLabel(r.paymentStatus) + "\">" + paymentStatusLabel(r.paymentStatus) + "</span></td>"
+        + "<td><button type=\"button\" class=\"admin-status-btn\" onclick=\"togglePaymentStatus('" + r.id + "','" + paymentStatusLabel(r.paymentStatus) + "')\">"
+        + (paymentStatusLabel(r.paymentStatus) === "완료" ? "대기로 변경" : "완료로 바꾸기") + "</button></td>"
         + "</tr>";
     }).join("");
   }
