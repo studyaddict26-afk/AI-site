@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>홀로 | ROADMAP × STUDY ADDICT</title>
+<script>
+  if (location.hash === "#admin") document.documentElement.setAttribute("data-boot", "admin");
+</script>
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" rel="stylesheet">
 <style>
@@ -177,6 +180,11 @@
 
   .view { flex: 1; display: none; flex-direction: column; min-height: 0; }
   .view.on { display: flex; }
+  html[data-boot="admin"] .view.on { display: none; }
+  html[data-boot="admin"] #view-admin { display: flex; }
+  html[data-boot="admin"] .sidebar,
+  html[data-boot="admin"] .overlay,
+  html[data-boot="admin"] .topbar { display: none; }
 
   /* ═══════════ 홈 화면 ═══════════ */
   #view-home { overflow-y: auto; scrollbar-gutter: stable; }
@@ -2655,6 +2663,7 @@
                   <th>예약 상태</th>
                   <th>상담 일정</th>
                   <th></th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody id="adminTableBody"></tbody>
@@ -2682,6 +2691,7 @@
                   <th>학생 전화번호</th>
                   <th>상담비 납부 현황</th>
                   <th>입금 날짜</th>
+                  <th></th>
                   <th></th>
                 </tr>
               </thead>
@@ -3222,8 +3232,8 @@
         + "<td><span class=\"admin-status-pill status-" + st + "\">" + st + "</span></td>"
         + "<td>" + escapeHtml(schedule) + "</td>"
         + "<td><button type=\"button\" class=\"admin-status-btn\" onclick=\"toggleReservationStatus('" + r.id + "','" + st + "')\">"
-        + (st === "확정" ? "대기로 변경" : "확정으로 변경") + "</button>"
-        + " <button type=\"button\" class=\"admin-delete-btn\" onclick=\"deleteReservation('" + r.id + "')\">삭제</button></td>"
+        + (st === "확정" ? "대기로 변경" : "확정으로 변경") + "</button></td>"
+        + "<td><button type=\"button\" class=\"admin-delete-btn\" onclick=\"deleteReservation('" + r.id + "')\">삭제</button></td>"
         + "</tr>";
     }).join("");
   }
@@ -3255,8 +3265,8 @@
         + "<td><span class=\"admin-status-pill status-" + paymentStatusLabel(r.paymentStatus) + "\">" + paymentStatusLabel(r.paymentStatus) + "</span></td>"
         + "<td>" + (paymentStatusLabel(r.paymentStatus) === "완료" ? escapeHtml(r.paymentDate || "-") : "-") + "</td>"
         + "<td><button type=\"button\" class=\"admin-status-btn\" onclick=\"togglePaymentStatus('" + r.id + "','" + paymentStatusLabel(r.paymentStatus) + "')\">"
-        + (paymentStatusLabel(r.paymentStatus) === "완료" ? "대기로 변경" : "완료로 바꾸기") + "</button>"
-        + " <button type=\"button\" class=\"admin-delete-btn\" onclick=\"deleteReservation('" + r.id + "')\">삭제</button></td>"
+        + (paymentStatusLabel(r.paymentStatus) === "완료" ? "대기로 변경" : "완료로 바꾸기") + "</button></td>"
+        + "<td><button type=\"button\" class=\"admin-delete-btn\" onclick=\"deleteReservation('" + r.id + "')\">삭제</button></td>"
         + "</tr>";
     }).join("");
   }
@@ -3276,6 +3286,7 @@
   });
 
   if (location.hash === "#admin") go("admin");
+  document.documentElement.removeAttribute("data-boot");
 </script>
 </body>
 </html>
