@@ -2629,6 +2629,9 @@
           <div class="admin-logo">AI 홀로 관리자</div>
         </div>
         <nav class="admin-nav">
+          <button class="admin-nav-item" type="button" onclick="showAdminPanel('availability', this)">
+            <span class="admin-nav-ico">🕒</span> 상담 가능한 일정
+          </button>
           <button class="admin-nav-item active" type="button" onclick="showAdminPanel('reservations', this)">
             <span class="admin-nav-ico">📋</span> 학습 상담 예약 현황
           </button>
@@ -2642,6 +2645,32 @@
       </aside>
 
       <main class="admin-main">
+        <div class="admin-panel" id="adminPanelAvailability" style="display:none;">
+          <div class="admin-page-head">
+            <span class="admin-page-ico">🕒</span>
+            <div>
+              <h2>상담 가능한 일정</h2>
+              <p class="admin-page-sub">이번 주 상담 가능한 시간을 한눈에 확인하고 관리합니다.</p>
+            </div>
+          </div>
+          <div class="admin-toolbar">
+            <button type="button" class="apply-submit-btn" style="flex:none;" onclick="openPinModal(openAvailabilityAddModal)">+ 새 일정 추가</button>
+          </div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>날짜</th>
+                  <th>시간</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="adminAvailabilityBody"></tbody>
+            </table>
+            <div class="admin-empty" id="adminAvailabilityEmptyMsg" style="display:none;">등록된 가능 일정이 없습니다.</div>
+          </div>
+        </div>
+
         <div class="admin-panel" id="adminPanelReservations">
           <div class="admin-page-head">
             <span class="admin-page-ico">📋</span>
@@ -2761,6 +2790,52 @@
           <button type="submit" class="apply-submit-btn">완료로 처리</button>
         </div>
         <div class="apply-status-msg" id="paymentMsg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── 비밀번호 확인 모달 ─── -->
+  <div class="apply-modal-overlay" id="pinModalOverlay" onclick="if(event.target===this) closePinModal()">
+    <div class="apply-modal" style="max-width:300px;">
+      <h3>비밀번호 확인</h3>
+      <div class="apply-sub">일정을 추가·삭제하려면 비밀번호 4자리를 입력하세요.</div>
+      <form id="pinForm" onsubmit="submitPin(event)">
+        <div class="apply-field">
+          <label for="pin-input">비밀번호</label>
+          <input type="password" id="pin-input" maxlength="4" inputmode="numeric" pattern="\d{4}" required autocomplete="off">
+        </div>
+        <div class="apply-actions">
+          <button type="button" class="apply-cancel-btn" onclick="closePinModal()">취소</button>
+          <button type="submit" class="apply-submit-btn">확인</button>
+        </div>
+        <div class="apply-status-msg" id="pinMsg"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ─── 상담 가능 일정 추가 모달 ─── -->
+  <div class="apply-modal-overlay" id="availAddModalOverlay" onclick="if(event.target===this) closeAvailAddModal()">
+    <div class="apply-modal" style="max-width:380px;">
+      <h3>상담 가능 일정 추가</h3>
+      <div class="apply-sub">추가할 날짜와 시간을 입력해주세요.</div>
+      <form id="availAddForm" onsubmit="submitAvailAdd(event)">
+        <div class="apply-field">
+          <label for="avail-date">날짜</label>
+          <input type="text" id="avail-date" placeholder="예: 2026-09-03" required>
+        </div>
+        <div class="apply-field">
+          <label for="avail-start">시작 시간</label>
+          <input type="text" id="avail-start" placeholder="예: 21시 20분" required>
+        </div>
+        <div class="apply-field">
+          <label for="avail-end">끝나는 시간</label>
+          <input type="text" id="avail-end" placeholder="예: 22시 20분" required>
+        </div>
+        <div class="apply-actions">
+          <button type="button" class="apply-cancel-btn" onclick="closeAvailAddModal()">취소</button>
+          <button type="submit" class="apply-submit-btn">추가하기</button>
+        </div>
+        <div class="apply-status-msg" id="availAddMsg"></div>
       </form>
     </div>
   </div>
@@ -3141,6 +3216,116 @@
     if (!confirm("이 신청을 삭제할까요? 삭제하면 되돌릴 수 없습니다.")) return;
     db.collection("reservations").doc(id).delete().catch(err => console.error(err));
   }
+
+  // ── 비밀번호(4자리) 확인 게이트 ──
+  const OWNER_PIN = "1128";
+  let pendingPinAction = null;
+  function openPinModal(action) {
+    pendingPinAction = action;
+    document.getElementById("pinForm").reset();
+    document.getElementById("pinMsg").textContent = "";
+    document.getElementById("pinMsg").className = "apply-status-msg";
+    document.getElementById("pinModalOverlay").classList.add("on");
+  }
+  function closePinModal() {
+    document.getElementById("pinModalOverlay").classList.remove("on");
+    pendingPinAction = null;
+  }
+  function submitPin(e) {
+    e.preventDefault();
+    const val = document.getElementById("pin-input").value.trim();
+    const msg = document.getElementById("pinMsg");
+    if (val !== OWNER_PIN) {
+      msg.textContent = "비밀번호가 올바르지 않습니다.";
+      msg.className = "apply-status-msg error";
+      return;
+    }
+    const action = pendingPinAction;
+    document.getElementById("pinModalOverlay").classList.remove("on");
+    pendingPinAction = null;
+    if (action) action();
+  }
+
+  // ── 상담 가능한 일정 ──
+  function timeToMinutes(t) {
+    const m = (t || "").match(/^(\d{1,2})시 (\d{1,2})분$/);
+    return m ? (parseInt(m[1], 10) * 60 + parseInt(m[2], 10)) : null;
+  }
+  function openAvailabilityAddModal() {
+    document.getElementById("availAddForm").reset();
+    document.getElementById("availAddMsg").textContent = "";
+    document.getElementById("availAddMsg").className = "apply-status-msg";
+    document.getElementById("availAddModalOverlay").classList.add("on");
+  }
+  function closeAvailAddModal() {
+    document.getElementById("availAddModalOverlay").classList.remove("on");
+  }
+  function submitAvailAdd(e) {
+    e.preventDefault();
+    const msg = document.getElementById("availAddMsg");
+    const date = document.getElementById("avail-date").value.trim();
+    const start = document.getElementById("avail-start").value.trim();
+    const end = document.getElementById("avail-end").value.trim();
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+    const timePattern = /^\d{1,2}시 \d{1,2}분$/;
+    if (!datePattern.test(date)) {
+      msg.textContent = "날짜는 2026-09-03 형식으로 입력해주세요.";
+      msg.className = "apply-status-msg error";
+      return;
+    }
+    if (!timePattern.test(start) || !timePattern.test(end)) {
+      msg.textContent = "시간은 21시 20분 형식으로 입력해주세요.";
+      msg.className = "apply-status-msg error";
+      return;
+    }
+    db.collection("availability").add({
+      date: date, start: start, end: end, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      closeAvailAddModal();
+    }).catch(err => {
+      console.error(err);
+      msg.textContent = "저장 중 오류가 발생했어요.";
+      msg.className = "apply-status-msg error";
+    });
+  }
+  function deleteAvailability(id) {
+    db.collection("availability").doc(id).delete().catch(err => console.error(err));
+  }
+  let unsubscribeAvailability = null;
+  let adminAllAvailability = [];
+  function loadAvailability() {
+    if (unsubscribeAvailability) return;
+    unsubscribeAvailability = db.collection("availability").orderBy("date")
+      .onSnapshot(snap => {
+        adminAllAvailability = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        renderAvailability();
+      }, err => console.error(err));
+  }
+  function renderAvailability() {
+    const body = document.getElementById("adminAvailabilityBody");
+    const empty = document.getElementById("adminAvailabilityEmptyMsg");
+    if (!body) return;
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const rows = adminAllAvailability
+      .filter(r => r.date >= todayStr)
+      .sort((a, b) => {
+        if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+        return (timeToMinutes(a.start) || 0) - (timeToMinutes(b.start) || 0);
+      });
+    if (!rows.length) {
+      body.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+    body.innerHTML = rows.map(r => {
+      return "<tr>"
+        + "<td>" + escapeHtml(r.date) + "</td>"
+        + "<td>" + escapeHtml(r.start) + " ~ " + escapeHtml(r.end) + "</td>"
+        + "<td><button type=\"button\" class=\"admin-delete-btn\" onclick=\"openPinModal(function(){ deleteAvailability('" + r.id + "'); })\">삭제</button></td>"
+        + "</tr>";
+    }).join("");
+  }
   function paymentStatusLabel(s) { return s === "완료" ? "완료" : "대기"; }
   let paymentTargetId = null;
   function togglePaymentStatus(id, current) {
@@ -3213,9 +3398,11 @@
   function showAdminPanel(name, btn) {
     document.querySelectorAll(".admin-nav-item").forEach(b => b.classList.remove("active"));
     if (btn) btn.classList.add("active");
+    document.getElementById("adminPanelAvailability").style.display = name === "availability" ? "block" : "none";
     document.getElementById("adminPanelReservations").style.display = name === "reservations" ? "block" : "none";
     document.getElementById("adminPanelSchedule").style.display = name === "schedule" ? "block" : "none";
     if (name === "schedule") renderAdminSchedule();
+    if (name === "availability") renderAvailability();
   }
   function renderAdminTable() {
     const body = document.getElementById("adminTableBody");
@@ -3294,6 +3481,7 @@
       loginBox.style.display = "none";
       dash.style.display = "flex";
       loadReservations();
+      loadAvailability();
     } else {
       loginBox.style.display = "block";
       dash.style.display = "none";
