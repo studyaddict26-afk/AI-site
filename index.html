@@ -1348,7 +1348,7 @@
   .admin-table th { color: var(--ink-soft); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.02em; }
   .admin-status-pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; }
   .admin-status-pill.status-대기 { background: #FDECEA; color: #B3261E; }
-  .admin-status-pill.status-완료 { background: var(--green-soft); color: var(--green-deep); }
+  .admin-status-pill.status-확정 { background: var(--green-soft); color: var(--green-deep); }
   .admin-status-btn { border: none; background: none; color: var(--green); font-weight: 700; font-size: 0.78rem; cursor: pointer; text-decoration: underline; }
   .admin-empty { padding: 40px 20px; text-align: center; color: var(--ink-soft); font-size: 0.88rem; }
   @media (max-width: 760px) {
@@ -2601,8 +2601,11 @@
           <div class="admin-logo">AI 홀로 관리자</div>
         </div>
         <nav class="admin-nav">
-          <button class="admin-nav-item active" type="button">
+          <button class="admin-nav-item active" type="button" onclick="showAdminPanel('reservations', this)">
             <span class="admin-nav-ico">📋</span> 학습 상담 예약 현황
+          </button>
+          <button class="admin-nav-item" type="button" onclick="showAdminPanel('schedule', this)">
+            <span class="admin-nav-ico">🗓️</span> 학습 상담 일정 현황
           </button>
         </nav>
         <div class="admin-sidebar-bottom">
@@ -2612,49 +2615,104 @@
       </aside>
 
       <main class="admin-main">
-        <div class="admin-page-head">
-          <span class="admin-page-ico">📋</span>
-          <div>
-            <h2>학습 상담 예약 현황</h2>
-            <p class="admin-page-sub">등록된 상담 신청을 조회하고 진행 상태를 관리합니다.</p>
+        <div class="admin-panel" id="adminPanelReservations">
+          <div class="admin-page-head">
+            <span class="admin-page-ico">📋</span>
+            <div>
+              <h2>학습 상담 예약 현황</h2>
+              <p class="admin-page-sub">등록된 상담 신청을 조회하고 진행 상태를 관리합니다.</p>
+            </div>
+          </div>
+
+          <div class="admin-toolbar">
+            <div class="admin-filter-tabs" id="adminFilterTabs">
+              <button class="admin-filter-tab active" data-type="all" onclick="setAdminFilter('all', this)">전체</button>
+              <button class="admin-filter-tab" data-type="전반적인 학습 컨설팅" onclick="setAdminFilter('전반적인 학습 컨설팅', this)">전반적인 학습 컨설팅</button>
+              <button class="admin-filter-tab" data-type="수학 과외" onclick="setAdminFilter('수학 과외', this)">수학 과외</button>
+              <button class="admin-filter-tab" data-type="국어 과외" onclick="setAdminFilter('국어 과외', this)">국어 과외</button>
+            </div>
+            <select class="admin-status-select" id="adminStatusFilter" onchange="renderAdminTable()">
+              <option value="all">예약 상태 전체</option>
+              <option value="대기">대기</option>
+              <option value="확정">확정</option>
+            </select>
+          </div>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>신청일시</th>
+                  <th>이름</th>
+                  <th>학교 및 학년</th>
+                  <th>상담 종류</th>
+                  <th>학생 전화번호</th>
+                  <th>학부모님 전화번호</th>
+                  <th>예약 상태</th>
+                  <th>상담 일정</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="adminTableBody"></tbody>
+            </table>
+            <div class="admin-empty" id="adminEmptyMsg" style="display:none;">아직 접수된 신청이 없습니다.</div>
           </div>
         </div>
 
-        <div class="admin-toolbar">
-          <div class="admin-filter-tabs" id="adminFilterTabs">
-            <button class="admin-filter-tab active" data-type="all" onclick="setAdminFilter('all', this)">전체</button>
-            <button class="admin-filter-tab" data-type="전반적인 학습 컨설팅" onclick="setAdminFilter('전반적인 학습 컨설팅', this)">전반적인 학습 컨설팅</button>
-            <button class="admin-filter-tab" data-type="수학 과외" onclick="setAdminFilter('수학 과외', this)">수학 과외</button>
-            <button class="admin-filter-tab" data-type="국어 과외" onclick="setAdminFilter('국어 과외', this)">국어 과외</button>
+        <div class="admin-panel" id="adminPanelSchedule" style="display:none;">
+          <div class="admin-page-head">
+            <span class="admin-page-ico">🗓️</span>
+            <div>
+              <h2>학습 상담 일정 현황</h2>
+              <p class="admin-page-sub">확정된 상담 일정을 날짜·시간이 빠른 순으로 한눈에 모아봅니다.</p>
+            </div>
           </div>
-          <select class="admin-status-select" id="adminStatusFilter" onchange="renderAdminTable()">
-            <option value="all">상태 전체</option>
-            <option value="대기">대기</option>
-            <option value="완료">완료</option>
-          </select>
-        </div>
-
-        <div class="admin-table-wrap">
-          <table class="admin-table">
-            <thead>
-              <tr>
-                <th>신청일시</th>
-                <th>이름</th>
-                <th>학교 및 학년</th>
-                <th>상담 종류</th>
-                <th>학생 전화번호</th>
-                <th>학부모님 전화번호</th>
-                <th>상태</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="adminTableBody"></tbody>
-          </table>
-          <div class="admin-empty" id="adminEmptyMsg" style="display:none;">아직 접수된 신청이 없습니다.</div>
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>상담 날짜</th>
+                  <th>상담 시간</th>
+                  <th>이름</th>
+                  <th>상담 종류</th>
+                  <th>학생 전화번호</th>
+                </tr>
+              </thead>
+              <tbody id="adminScheduleBody"></tbody>
+            </table>
+            <div class="admin-empty" id="adminScheduleEmptyMsg" style="display:none;">확정된 상담 일정이 아직 없습니다.</div>
+          </div>
         </div>
       </main>
     </div>
   </section>
+
+  <!-- ─── 상담 일정 입력 모달 ─── -->
+  <div class="apply-modal-overlay" id="scheduleModalOverlay" onclick="if(event.target===this) closeScheduleModal()">
+    <div class="apply-modal" style="max-width:380px;">
+      <h3>상담 일정 입력</h3>
+      <div class="apply-sub">일정을 입력해야 예약이 확정됩니다.</div>
+      <form id="scheduleForm" onsubmit="submitSchedule(event)">
+        <div class="apply-field">
+          <label for="sch-date">상담 날짜</label>
+          <input type="text" id="sch-date" placeholder="2026-09-03" required>
+        </div>
+        <div class="apply-field">
+          <label for="sch-start">시작 시간</label>
+          <input type="text" id="sch-start" placeholder="21시 20분" required>
+        </div>
+        <div class="apply-field">
+          <label for="sch-end">끝나는 시간</label>
+          <input type="text" id="sch-end" placeholder="22시 20분" required>
+        </div>
+        <div class="apply-actions">
+          <button type="button" class="apply-cancel-btn" onclick="closeScheduleModal()">취소</button>
+          <button type="submit" class="apply-submit-btn">확정하기</button>
+        </div>
+        <div class="apply-status-msg" id="scheduleMsg"></div>
+      </form>
+    </div>
+  </div>
 
 </div>
 
@@ -2960,10 +3018,55 @@
   function adminLogout() {
     auth.signOut();
   }
-  function statusLabel(s) { return s === "완료" ? "완료" : "대기"; }
+  function statusLabel(s) { return s === "확정" ? "확정" : "대기"; }
+  let scheduleTargetId = null;
   function toggleReservationStatus(id, current) {
-    const next = current === "완료" ? "대기" : "완료";
-    db.collection("reservations").doc(id).update({ status: next });
+    if (current === "확정") {
+      db.collection("reservations").doc(id).update({ status: "대기" });
+      return;
+    }
+    scheduleTargetId = id;
+    const r = adminAllReservations.find(x => x.id === id);
+    document.getElementById("scheduleForm").reset();
+    document.getElementById("scheduleMsg").textContent = "";
+    document.getElementById("scheduleMsg").className = "apply-status-msg";
+    if (r && r.scheduleDate) document.getElementById("sch-date").value = r.scheduleDate;
+    if (r && r.scheduleStart) document.getElementById("sch-start").value = r.scheduleStart;
+    if (r && r.scheduleEnd) document.getElementById("sch-end").value = r.scheduleEnd;
+    document.getElementById("scheduleModalOverlay").classList.add("on");
+  }
+  function closeScheduleModal() {
+    document.getElementById("scheduleModalOverlay").classList.remove("on");
+    scheduleTargetId = null;
+  }
+  function submitSchedule(e) {
+    e.preventDefault();
+    const msg = document.getElementById("scheduleMsg");
+    const date = document.getElementById("sch-date").value.trim();
+    const start = document.getElementById("sch-start").value.trim();
+    const end = document.getElementById("sch-end").value.trim();
+    const datePattern = /^\d{4}-\d{2}-\d{2}$/;
+    const timePattern = /^\d{1,2}시 \d{1,2}분$/;
+    if (!datePattern.test(date)) {
+      msg.textContent = "상담 날짜는 2026-09-03 형식으로 입력해주세요.";
+      msg.className = "apply-status-msg error";
+      return;
+    }
+    if (!timePattern.test(start) || !timePattern.test(end)) {
+      msg.textContent = "시간은 21시 20분 형식으로 입력해주세요.";
+      msg.className = "apply-status-msg error";
+      return;
+    }
+    if (!scheduleTargetId) return;
+    db.collection("reservations").doc(scheduleTargetId).update({
+      status: "확정", scheduleDate: date, scheduleStart: start, scheduleEnd: end
+    }).then(() => {
+      closeScheduleModal();
+    }).catch(err => {
+      console.error(err);
+      msg.textContent = "저장 중 오류가 발생했어요.";
+      msg.className = "apply-status-msg error";
+    });
   }
   function fmtDate(ts) {
     if (!ts || !ts.toDate) return "-";
@@ -2982,6 +3085,7 @@
       .onSnapshot(snap => {
         adminAllReservations = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
         renderAdminTable();
+        renderAdminSchedule();
       }, err => console.error(err));
   }
   function setAdminFilter(type, btn) {
@@ -2989,6 +3093,13 @@
     document.querySelectorAll(".admin-filter-tab").forEach(b => b.classList.remove("active"));
     if (btn) btn.classList.add("active");
     renderAdminTable();
+  }
+  function showAdminPanel(name, btn) {
+    document.querySelectorAll(".admin-nav-item").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+    document.getElementById("adminPanelReservations").style.display = name === "reservations" ? "block" : "none";
+    document.getElementById("adminPanelSchedule").style.display = name === "schedule" ? "block" : "none";
+    if (name === "schedule") renderAdminSchedule();
   }
   function renderAdminTable() {
     const body = document.getElementById("adminTableBody");
@@ -3009,6 +3120,7 @@
     body.innerHTML = rows.map(r => {
       const st = statusLabel(r.status);
       const types = r.types || (r.type ? [r.type] : []);
+      const schedule = (st === "확정" && r.scheduleDate) ? (r.scheduleDate + " " + r.scheduleStart + "~" + r.scheduleEnd) : "-";
       return "<tr>"
         + "<td>" + fmtDate(r.createdAt) + "</td>"
         + "<td>" + escapeHtml(r.name) + "</td>"
@@ -3017,8 +3129,37 @@
         + "<td>" + escapeHtml(r.studentPhone || r.phone || "-") + "</td>"
         + "<td>" + escapeHtml(r.parentPhone || "-") + "</td>"
         + "<td><span class=\"admin-status-pill status-" + st + "\">" + st + "</span></td>"
+        + "<td>" + escapeHtml(schedule) + "</td>"
         + "<td><button type=\"button\" class=\"admin-status-btn\" onclick=\"toggleReservationStatus('" + r.id + "','" + st + "')\">"
-        + (st === "완료" ? "대기로 변경" : "완료로 변경") + "</button></td>"
+        + (st === "확정" ? "대기로 변경" : "확정으로 변경") + "</button></td>"
+        + "</tr>";
+    }).join("");
+  }
+  function renderAdminSchedule() {
+    const body = document.getElementById("adminScheduleBody");
+    const empty = document.getElementById("adminScheduleEmptyMsg");
+    if (!body) return;
+    const rows = adminAllReservations
+      .filter(r => statusLabel(r.status) === "확정" && r.scheduleDate && r.scheduleStart)
+      .sort((a, b) => {
+        const ka = a.scheduleDate + " " + a.scheduleStart;
+        const kb = b.scheduleDate + " " + b.scheduleStart;
+        return ka < kb ? -1 : ka > kb ? 1 : 0;
+      });
+    if (!rows.length) {
+      body.innerHTML = "";
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+    body.innerHTML = rows.map(r => {
+      const types = r.types || (r.type ? [r.type] : []);
+      return "<tr>"
+        + "<td>" + escapeHtml(r.scheduleDate) + "</td>"
+        + "<td>" + escapeHtml(r.scheduleStart) + " ~ " + escapeHtml(r.scheduleEnd) + "</td>"
+        + "<td>" + escapeHtml(r.name) + "</td>"
+        + "<td style=\"white-space:normal; max-width:200px;\">" + escapeHtml(types.join(", ")) + "</td>"
+        + "<td>" + escapeHtml(r.studentPhone || r.phone || "-") + "</td>"
         + "</tr>";
     }).join("");
   }
