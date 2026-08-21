@@ -1314,8 +1314,8 @@
     display: flex; flex-direction: column;
     padding: 22px 16px;
   }
-  .admin-sidebar-top { padding: 0 6px 20px 6px; border-bottom: 1px solid rgba(255,255,255,0.14); margin-bottom: 16px; }
-  .admin-logo { font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; }
+  .admin-sidebar-top { padding: 0 6px 20px 6px; border-bottom: 1px solid rgba(255,255,255,0.14); margin-bottom: 16px; text-align: center; }
+  .admin-logo { font-size: 1.02rem; font-weight: 800; letter-spacing: -0.01em; text-align: center; }
   .admin-nav { display: flex; flex-direction: column; gap: 4px; flex: 1; }
   .admin-nav-item {
     display: flex; align-items: center; gap: 10px;
@@ -1344,8 +1344,9 @@
     background: var(--green-soft); color: var(--green-deep);
     display: flex; align-items: center; justify-content: center; font-size: 1rem;
   }
-  .admin-page-head h2 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.01em; }
-  .admin-page-sub { font-size: 0.84rem; color: var(--ink-soft); margin-top: 4px; word-break: keep-all; }
+  .admin-page-head h2 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.01em; }
+  .admin-page-head .split { height: 3px; width: 60px; border-radius: 2px; margin: 9px 0 10px 0; background: linear-gradient(to right, var(--green) 50%, var(--ink) 50%); }
+  .admin-page-sub { font-size: 0.82rem; color: var(--ink-soft); word-break: keep-all; }
 
   .admin-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
   .admin-filter-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
@@ -2720,8 +2721,8 @@
             </div>
 
             <div class="apply-field">
-              <label for="cf-schedule">확정된 상담 일정</label>
-              <input type="text" id="cf-schedule">
+              <label for="cf-schedule">확정된 상담 일정 (작성 형식: 2026-08-22)</label>
+              <input type="text" id="cf-schedule" placeholder="예: 2026-08-22">
             </div>
 
             <div class="cf-row" style="grid-template-columns:1fr 1fr;">
@@ -2806,7 +2807,7 @@
     <div class="admin-shell" id="adminDashboard" style="display:none;">
       <aside class="admin-sidebar">
         <div class="admin-sidebar-top">
-          <div class="admin-logo">AI 홀로 관리자</div>
+          <div class="admin-logo">STUDY ADDICT 관리자</div>
         </div>
         <nav class="admin-nav">
           <button class="admin-nav-item" type="button" onclick="showAdminPanel('availability', this)">
@@ -2833,7 +2834,12 @@
             <span class="admin-page-ico">🕒</span>
             <div>
               <h2>상담 가능한 일정</h2>
-              <p class="admin-page-sub">이번 주 상담 가능한 시간을 한눈에 확인하고 관리합니다.</p>
+              <div class="split"></div>
+              <p class="admin-page-sub">
+                1. 송의준 선생님의 상담 가능한 일정입니다.<br>
+                2. 아래의 일정을 참고해서 학생들과 상담 일정을 조율해주세요.<br>
+                3. 가능하면 뜨는 시간 없이 상담 시간이 이어지도록 조율해주시길 부탁 드립니다.
+              </p>
             </div>
           </div>
           <div class="admin-toolbar">
@@ -2859,6 +2865,7 @@
             <span class="admin-page-ico">📋</span>
             <div>
               <h2>학습 상담 예약 현황</h2>
+              <div class="split"></div>
               <p class="admin-page-sub">등록된 상담 신청을 조회하고 진행 상태를 관리합니다.</p>
             </div>
           </div>
@@ -2904,6 +2911,7 @@
             <span class="admin-page-ico">🗓️</span>
             <div>
               <h2>학습 상담 일정 현황</h2>
+              <div class="split"></div>
               <p class="admin-page-sub">확정된 상담 일정을 날짜·시간이 빠른 순으로 한눈에 모아봅니다.</p>
             </div>
           </div>
@@ -2933,6 +2941,7 @@
             <span class="admin-page-ico">📝</span>
             <div>
               <h2>상담 신청서 관리</h2>
+              <div class="split"></div>
               <p class="admin-page-sub">학생들이 제출한 학습 상담 신청서를 확인합니다.</p>
             </div>
           </div>
@@ -3339,11 +3348,17 @@
     const btn = document.getElementById("cfSubmitBtn");
     const msg = document.getElementById("cfMsg");
     const directions = Array.from(document.querySelectorAll('input[name="cf-direction"]:checked')).map(c => c.value);
+    const scheduleVal = document.getElementById("cf-schedule").value.trim();
+    if (scheduleVal && !/^\d{4}-\d{2}-\d{2}$/.test(scheduleVal)) {
+      msg.textContent = "확정된 상담 일정은 2026-08-22 형식으로 입력해주세요.";
+      msg.className = "apply-status-msg error";
+      return;
+    }
     const data = {
       name: document.getElementById("cf-name").value.trim(),
       school: document.getElementById("cf-school").value.trim(),
       grade: document.getElementById("cf-grade").value.trim(),
-      schedule: document.getElementById("cf-schedule").value.trim(),
+      schedule: scheduleVal,
       naesinSubjects: document.getElementById("cf-naesin-subj").value.trim(),
       jeongsiSubjects: document.getElementById("cf-jeongsi-subj").value.trim(),
       gradeNaesin: document.getElementById("cf-grade-naesin").value.trim(),
