@@ -2680,6 +2680,7 @@
                   <th>상담 종류</th>
                   <th>학생 전화번호</th>
                   <th>상담비 납부 현황</th>
+                  <th>입금 날짜</th>
                   <th></th>
                 </tr>
               </thead>
@@ -3228,6 +3229,7 @@
         + "<td style=\"white-space:normal; max-width:200px;\">" + formatTypes(types) + "</td>"
         + "<td>" + escapeHtml(r.studentPhone || r.phone || "-") + "</td>"
         + "<td><span class=\"admin-status-pill status-" + paymentStatusLabel(r.paymentStatus) + "\">" + paymentStatusLabel(r.paymentStatus) + "</span></td>"
+        + "<td>" + (paymentStatusLabel(r.paymentStatus) === "완료" ? escapeHtml(r.paymentDate || "-") : "-") + "</td>"
         + "<td><button type=\"button\" class=\"admin-status-btn\" onclick=\"togglePaymentStatus('" + r.id + "','" + paymentStatusLabel(r.paymentStatus) + "')\">"
         + (paymentStatusLabel(r.paymentStatus) === "완료" ? "대기로 변경" : "완료로 바꾸기") + "</button></td>"
         + "</tr>";
