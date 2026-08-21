@@ -3572,7 +3572,13 @@
       return;
     }
     empty.style.display = "none";
-    list.innerHTML = adminAllForms.map(f => {
+    const sorted = adminAllForms.slice().sort((a, b) => {
+      if (!a.schedule && !b.schedule) return 0;
+      if (!a.schedule) return 1;
+      if (!b.schedule) return -1;
+      return a.schedule < b.schedule ? -1 : a.schedule > b.schedule ? 1 : 0;
+    });
+    list.innerHTML = sorted.map(f => {
       const meta = [f.school, f.grade].filter(Boolean).join(" ") + (f.schedule ? " · " + f.schedule : "");
       return "<div class=\"admin-form-card\">"
         + "<div class=\"admin-form-card-main\">"
